@@ -1,0 +1,9 @@
+# Generated .NET files
+**/bin/
+**/obj/
+
+# Local Rider settings
+.idea/
+
+# Mac specific files
+.DS_Store
