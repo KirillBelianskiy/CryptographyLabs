@@ -18,13 +18,6 @@ public static class BitUtils
             throw new ArgumentNullException(nameof(pBlock), "P-block cannot be null.");
         }
 
-        if (input.Length * 8 != pBlock.Length)
-        {
-            throw new ArgumentException(
-                "P-block length must equal the input bit count.",
-                nameof(pBlock));
-        }
-
         if (startIndex != 0 && startIndex != 1)
         {
             throw new ArgumentException(
@@ -32,17 +25,24 @@ public static class BitUtils
                 nameof(startIndex));
         }
 
-        byte[] result = new byte[input.Length];
+        long bitCount = (long)input.Length * 8;
+        byte[] result = new byte[pBlock.Length / 8 + (pBlock.Length % 8 == 0 ? 0 : 1)];
         for (int i = 0; i < pBlock.Length; i++)
         {
             int index = pBlock[i];
 
             if (startIndex == 1)
             {
+                if (index <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(pBlock), "One-based indices must be positive.");
+                }
+
                 index -= 1;
             }
 
-            if (index < 0 || index >= input.Length * 8)
+            if (index < 0 || index >= bitCount)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(pBlock),

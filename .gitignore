@@ -7,3 +7,6 @@
 
 # Mac specific files
 .DS_Store
+
+# Generated encryption demonstrations.
+demo-output/
