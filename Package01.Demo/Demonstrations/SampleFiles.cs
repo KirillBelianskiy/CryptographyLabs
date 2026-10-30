@@ -5,6 +5,9 @@ namespace Package01.Demo.Demonstrations;
 // Small valid files keep the demonstration independent of external codecs.
 internal static class SampleFiles
 {
+    internal static IReadOnlyList<string> Names { get; } =
+        ["image.bmp", "music.wav", "sample.cs", "text.txt", "video.y4m"];
+
     internal static async Task CreateAsync(string directory)
     {
         Directory.CreateDirectory(directory);

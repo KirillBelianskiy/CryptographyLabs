@@ -107,6 +107,18 @@ public static class NumberTheory
         return result;
     }
 
+    public static BigInteger ModInverse(BigInteger value, BigInteger modulus)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(modulus, new BigInteger(2));
+        BezoutResult result = ExtendedGcd(value, modulus);
+        if (result.Gcd != 1)
+        {
+            throw new ArgumentException("The value has no inverse modulo the modulus.", nameof(value));
+        }
+
+        return Normalize(result.X, modulus);
+    }
+
     public static int Jacobi(BigInteger numerator, BigInteger denominator)
     {
         if (denominator <= 0 || denominator.IsEven)
@@ -250,5 +262,26 @@ public static class NumberTheory
         }
 
         return result;
+    }
+
+    public static BigInteger IntegerSquareRoot(BigInteger value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        if (value < 2)
+        {
+            return value;
+        }
+
+        BigInteger estimate = BigInteger.One << checked((int)((value.GetBitLength() + 1) / 2));
+        while (true)
+        {
+            BigInteger next = (estimate + value / estimate) / 2;
+            if (next >= estimate)
+            {
+                return estimate;
+            }
+
+            estimate = next;
+        }
     }
 }

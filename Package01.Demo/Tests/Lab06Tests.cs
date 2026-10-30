@@ -6,7 +6,10 @@ namespace Package01.Demo.Tests;
 
 internal static class Lab06Tests
 {
-    public static Task<(int Total, int Failed)> RunAsync()
+    public static Task<(int Total, int Failed)> RunAsync() =>
+        TestSupport.RunAsync(CreateTests());
+
+    internal static IReadOnlyList<TestCase> CreateTests()
     {
         List<TestCase> tests = [];
         // Regression vectors calculated separately with integer/bit DES and
@@ -103,6 +106,6 @@ internal static class Lab06Tests
             AssertThrows<ArgumentException>(() => cipher.EncryptBlock(new byte[15]));
             AssertThrows<ArgumentException>(() => cipher.DecryptBlock(new byte[17]));
         });
-        return TestSupport.RunAsync(tests);
+        return tests;
     }
 }

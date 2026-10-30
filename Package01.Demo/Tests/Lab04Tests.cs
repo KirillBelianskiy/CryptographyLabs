@@ -6,7 +6,10 @@ namespace Package01.Demo.Tests;
 
 internal static class Lab04Tests
 {
-    public static Task<(int Total, int Failed)> RunAsync()
+    public static Task<(int Total, int Failed)> RunAsync() =>
+        TestSupport.RunAsync(CreateTests());
+
+    internal static IReadOnlyList<TestCase> CreateTests()
     {
         List<TestCase> tests = [];
         // The last three examples are the ECB blocks from FIPS 81, Appendix A.
@@ -78,6 +81,6 @@ internal static class Lab04Tests
             cipher.SetKey(new byte[8]);
             AssertEqual(Convert.FromHexString("8CA64DE9C1B123A7"), cipher.EncryptBlock(new byte[8]));
         });
-        return TestSupport.RunAsync(tests);
+        return tests;
     }
 }

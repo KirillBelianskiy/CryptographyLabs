@@ -13,6 +13,18 @@ internal static class Program
             return 0;
         }
 
+        if (args.Length > 0 && args[0].Equals("pic", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length > 2)
+            {
+                PrintUsage();
+                return 2;
+            }
+
+            await PicExample.RunAsync(args.Length == 2 ? args[1] : null);
+            return 0;
+        }
+
         string selection = args.Length == 0 ? "all" : args[0].ToLowerInvariant();
         if (args.Length > 2 || selection is not ("all" or "1" or "2" or "3" or "4" or "5" or "6" or "7"))
         {
@@ -72,5 +84,6 @@ internal static class Program
     {
         Console.WriteLine("Usage: dotnet run --project Package01.Demo -- [1|2|3|4|5|6|7|all] [output-directory]");
         Console.WriteLine("Without arguments, all seven tasks run. Demo files go to demo-output.");
+        Console.WriteLine("Image example: dotnet run --project Package01.Demo -- pic [image-path]");
     }
 }

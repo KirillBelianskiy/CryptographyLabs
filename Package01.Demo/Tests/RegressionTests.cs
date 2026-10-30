@@ -9,7 +9,10 @@ namespace Package01.Demo.Tests;
 
 internal static class RegressionTests
 {
-    internal static Task<(int Total, int Failed)> RunAsync()
+    internal static Task<(int Total, int Failed)> RunAsync() =>
+        TestSupport.RunAsync(CreateTests());
+
+    internal static IReadOnlyList<TestCase> CreateTests()
     {
         List<TestCase> tests = [];
         AddAsyncTest(tests, "Zeros: remove tails longer than a block or buffer", async () =>
@@ -63,7 +66,7 @@ internal static class RegressionTests
             AssertThrows<ArgumentException>(() => network.SetKey([]));
         });
         AlgorithmAuditTests.Register(tests);
-        return TestSupport.RunAsync(tests);
+        return tests;
     }
 
     private sealed class CopyCipher : ISymmetricBlockCipher

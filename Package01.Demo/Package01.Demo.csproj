@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <StartupObject>Package01.Demo.Program</StartupObject>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -9,6 +10,11 @@
 
   <ItemGroup>
     <ProjectReference Include="../Package01/Package01.csproj" />
+    <InternalsVisibleTo Include="Package01.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="examples\" />
   </ItemGroup>
 
 </Project>

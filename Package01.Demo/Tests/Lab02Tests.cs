@@ -17,7 +17,7 @@ internal static class Lab02Tests
     public static Task<(int Total, int Failed)> RunAsync() =>
         TestSupport.RunAsync(CreateTests());
 
-    private static IReadOnlyList<TestCase> CreateTests()
+    internal static IReadOnlyList<TestCase> CreateTests()
     {
         List<TestCase> tests = [];
         RegisterContextTests(tests);

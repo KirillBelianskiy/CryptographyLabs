@@ -122,6 +122,20 @@ public sealed class ArithmeticTests
     }
 
     [Test]
+    public void SquareRootHasExactFloorIncludingLargeSquares()
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            BigInteger root = NumberTheory.IntegerSquareRoot(i);
+            Assert.That(root * root <= i && (root + 1) * (root + 1) > i, Is.True);
+        }
+
+        BigInteger large = (BigInteger.One << 512) + 123;
+        Assert.That(NumberTheory.IntegerSquareRoot(large * large), Is.EqualTo(large));
+        Assert.That(NumberTheory.IntegerSquareRoot(large * large - 1), Is.EqualTo(large - 1));
+    }
+
+    [Test]
     public void InvalidArgumentsAreRejected()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => NumberTheory.ModPow(2, -1, 5));
@@ -130,5 +144,8 @@ public sealed class ArithmeticTests
         Assert.Throws<ArgumentOutOfRangeException>(() => NumberTheory.Factorize(0));
         Assert.Throws<ArgumentOutOfRangeException>(() => NumberTheory.EulerByDefinition(0));
         Assert.Throws<ArgumentOutOfRangeException>(() => NumberTheory.EulerByFourier(100_001));
+        Assert.Throws<ArgumentOutOfRangeException>(() => NumberTheory.IntegerSquareRoot(-1));
+        Assert.Throws<ArgumentException>(() => NumberTheory.ModInverse(6, 9));
+        Assert.That(NumberTheory.ModInverse(-3, 11), Is.EqualTo(new BigInteger(7)));
     }
 }

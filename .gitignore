@@ -10,3 +10,8 @@
 
 # Generated encryption demonstrations.
 demo-output/
+Package01.Demo/Demonstrations/pic.png.encrypted
+Package01.Demo/Demonstrations/encrypted_pic.png
+Package01.Demo/Demonstrations/decrypted_pic.png
+Package01.Demo/examples/encrypted_*
+Package01.Demo/examples/decrypted_*

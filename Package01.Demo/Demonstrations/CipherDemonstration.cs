@@ -11,7 +11,14 @@ namespace Package01.Demo.Demonstrations;
 
 internal static class CipherDemonstration
 {
-    internal static async Task<(int Total, int Failed)> RunAsync(
+    internal static Task<(int Total, int Failed)> RunAsync(
+        bool useDeal, string outputDirectory)
+    {
+        Console.WriteLine($"Demonstration files: {Path.GetFullPath(outputDirectory)}");
+        return TestSupport.RunAsync(CreateTests(useDeal, outputDirectory));
+    }
+
+    internal static IReadOnlyList<TestCase> CreateTests(
         bool useDeal, string outputDirectory)
     {
         string name = useDeal ? "DEAL" : "DES";
@@ -24,7 +31,6 @@ internal static class CipherDemonstration
         int blockSize = useDeal ? 16 : 8;
         string root = Path.Combine(Path.GetFullPath(outputDirectory), name);
         string samples = Path.Combine(root, "samples");
-        await SampleFiles.CreateAsync(samples);
         List<TestCase> tests = [];
 
         foreach (CipherMode mode in Enum.GetValues<CipherMode>())
@@ -51,11 +57,12 @@ internal static class CipherDemonstration
                 });
             }
 
-            foreach (string inputPath in Directory.GetFiles(samples).Order())
+            foreach (string filename in SampleFiles.Names)
             {
-                string filename = Path.GetFileName(inputPath);
                 AddAsyncTest(tests, $"{name}/{mode}: file {filename}", async () =>
                 {
+                    await SampleFiles.CreateAsync(samples);
+                    string inputPath = Path.Combine(samples, filename);
                     string directory = Path.Combine(root, mode.ToString());
                     Directory.CreateDirectory(directory);
                     string encryptedPath = Path.Combine(directory, $"{filename}.encrypted");
@@ -72,6 +79,7 @@ internal static class CipherDemonstration
 
         AddAsyncTest(tests, $"{name}: file crosses a 64 KiB buffer", async () =>
         {
+            Directory.CreateDirectory(root);
             string inputPath = Path.Combine(root, "large.bin");
             string encryptedPath = Path.Combine(root, "large.bin.encrypted");
             string restoredPath = Path.Combine(root, "large-restored.bin");
@@ -86,8 +94,56 @@ internal static class CipherDemonstration
             await context.DecryptAsync(encryptedPath, restoredPath);
             AssertEqual(data, await File.ReadAllBytesAsync(restoredPath));
         });
-        Console.WriteLine($"Demonstration files: {root}");
-        return await TestSupport.RunAsync(tests);
+
+        string examplesDirectory = FindExamplesDirectory();
+        string[] inputPaths = Directory.GetFiles(examplesDirectory)
+            .Where(path => !Path.GetFileName(path).StartsWith(".", StringComparison.Ordinal) &&
+                !Path.GetFileName(path).StartsWith("encrypted_", StringComparison.OrdinalIgnoreCase) &&
+                !Path.GetFileName(path).StartsWith("decrypted_", StringComparison.OrdinalIgnoreCase))
+            .Order()
+            .ToArray();
+        if (inputPaths.Length == 0)
+        {
+            throw new InvalidOperationException("The examples directory contains no input files.");
+        }
+
+        foreach (string inputPath in inputPaths)
+        {
+            string filename = Path.GetFileName(inputPath);
+            AddAsyncTest(tests, $"{name}/Cbc: examples/{filename}", async () =>
+            {
+                string encryptedPath = Path.Combine(examplesDirectory, $"encrypted_{name}_{filename}");
+                string decryptedPath = Path.Combine(examplesDirectory, $"decrypted_{name}_{filename}");
+                byte[] original = await File.ReadAllBytesAsync(inputPath);
+                SymmetricCipherContext context = CreateContext(
+                    createCipher(), key, CipherMode.Cbc, PaddingMode.Pkcs7);
+                await context.EncryptAsync(inputPath, encryptedPath);
+                await context.DecryptAsync(encryptedPath, decryptedPath);
+                AssertEqual(original, await File.ReadAllBytesAsync(decryptedPath));
+                AssertEqual(original, await File.ReadAllBytesAsync(inputPath),
+                    "The input example was modified.");
+                Console.WriteLine($"Encrypted: {encryptedPath}");
+                Console.WriteLine($"Decrypted: {decryptedPath}");
+            });
+        }
+
+        return tests;
+    }
+
+    private static string FindExamplesDirectory()
+    {
+        for (DirectoryInfo? directory = new(AppContext.BaseDirectory);
+             directory is not null;
+             directory = directory.Parent)
+        {
+            string path = Path.Combine(directory.FullName, "Package01.Demo", "examples");
+            if (Directory.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        throw new DirectoryNotFoundException("Cannot find Package01.Demo/examples in the project.");
     }
 
     private static SymmetricCipherContext CreateContext(
